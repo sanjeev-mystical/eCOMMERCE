@@ -20,7 +20,7 @@ def contact_page(request):
         "brand": 'new brand name'
     }
     if contact_form.is_valid():
-        print(contact_form.cleaned_data)
+        print(contact_form.cleaned_data) 
         if request.is_ajax():
             return JsonResponse({"message": 'Thank You For Your Submission'})
 
