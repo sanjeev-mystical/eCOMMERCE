@@ -4,15 +4,16 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
 class UserManager(BaseUserManager):
-	def create_user(self,email,password=None,is_active=True, is_staff=False, is_admin=False):
+	def create_user(self,email,full_name,password=None,is_active=True, is_staff=False, is_admin=False):
 		if not email:
 			raise ValueError('Users Must Have an email Address')
 		if not password:
 			raise ValueError('Users Must Have a password')
-
+		if not full_name:
+			raise ValueError('Users Must have a Full Name')
 		user_obj = self.model(
-			email = self.normalize_email(email) #built in method for base user manager
-
+			email = self.normalize_email(email), #built in method for base user manager
+			full_name = full_name
 		)
 		user_obj.set_password(password)	 #change user password
 		user_obj.staff = is_staff
@@ -21,17 +22,19 @@ class UserManager(BaseUserManager):
 		user_obj.save(using=self._db)
 		return user_obj
 
-	def create_staffuser(self, email, password=None):
+	def create_staffuser(self, email,full_name, password=None):
 		user = self.create_user(
 				email,
+				full_name,
 				password = password,
 				is_staff = True
 			)
 		return user
 
-	def create_superuser(self, email, password=None):
+	def create_superuser(self, email,full_name, password=None):
 		user = self.create_user(
 				email,
+				full_name,
 				password = password,
 				is_staff = True,
 				is_admin = True
@@ -41,6 +44,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
 	email = models.EmailField(unique=True,max_length=255)
+	full_name = models.CharField(max_length=255,blank=True,null=True)
 	active = models.BooleanField(default=True) #can login
 	staff = models.BooleanField(default=False) #staff User non superuser
 	admin = models.BooleanField(default=False) #superuser
@@ -48,7 +52,7 @@ class User(AbstractBaseUser):
 
 	USERNAME_FIELD = 'email'
 
-	REQUIRED_FIELDS = [] #['full_name'] #python manage.py createsuperuser
+	REQUIRED_FIELDS = ['full_name'] #['full_name'] #python manage.py createsuperuser
 
 	objects = UserManager()
 
